@@ -8,7 +8,7 @@ import {
 } from '@drift-labs/sdk';
 import { BN } from '@project-serum/anchor';
 import { PublicKey } from '@solana/web3.js';
-import { listTypeForOrder } from './DLOB';
+import { nodeTypeForOrder } from './DLOB';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -63,10 +63,10 @@ export class Node {
 		return order.triggerPrice;
 	}
 
-	public pricesCross(markPrice: BN): boolean {
+	public pricesCross(price: BN): boolean {
 		return this.sortDirection === 'desc'
-			? markPrice.lt(this.sortPrice)
-			: markPrice.gt(this.sortPrice);
+			? price.lt(this.sortPrice)
+			: price.gt(this.sortPrice);
 	}
 
 	public getLabel(): string {
@@ -98,12 +98,6 @@ export class Node {
 export class FloatingNode extends Node {
 	getSortingPrice(order: Order): BN {
 		return order.oraclePriceOffset;
-	}
-
-	public pricesCross(markOracleSpread: BN): boolean {
-		return this.sortDirection === 'desc'
-			? markOracleSpread.lt(this.sortPrice)
-			: markOracleSpread.gt(this.sortPrice);
 	}
 
 	public getLabel(): string {
@@ -145,7 +139,7 @@ export class OrderList {
 		}
 
 		const newNode =
-			listTypeForOrder(order) === 'fixed'
+			nodeTypeForOrder(order) === 'fixed'
 				? new Node(order, userAccount, orderAccount, this.sortDirection)
 				: new FloatingNode(
 						order,
@@ -257,15 +251,4 @@ export class OrderList {
 			console.log('---');
 		}
 	}
-}
-
-export function sortDirectionForOrder(order: Order): SortDirection {
-	if (
-		isVariant(order.orderType, 'triggerMarket') ||
-		isVariant(order.orderType, 'triggerLimit')
-	) {
-		return isVariant(order.triggerCondition, 'below') ? 'desc' : 'asc';
-	}
-
-	return isVariant(order.direction, 'long') ? 'desc' : 'asc';
 }
