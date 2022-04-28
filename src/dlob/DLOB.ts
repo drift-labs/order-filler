@@ -1,18 +1,18 @@
-import { OrderList } from './OrderList';
-import { isVariant, Markets, Order, ZERO } from '@drift-labs/sdk';
+import { NodeType, nodeTypeForOrder, OrderList } from './OrderList';
+import { isVariant, Markets, Order } from '@drift-labs/sdk';
 import { PublicKey } from '@solana/web3.js';
 
 type OrderLists = {
 	ask: {
-		asc: OrderList,
-	},
+		asc: OrderList;
+	};
 	mark: {
-		asc: OrderList,
-		desc: OrderList,
-	},
+		asc: OrderList;
+		desc: OrderList;
+	};
 	bid: {
-		desc: OrderList,
-	},
+		desc: OrderList;
+	};
 };
 
 export type DLOBOrderLists = {
@@ -21,12 +21,6 @@ export type DLOBOrderLists = {
 };
 
 type OrderBookCallback = () => void;
-
-export type NodeType = 'fixed' | 'floating';
-
-export function nodeTypeForOrder(order: Order): NodeType {
-	return order.oraclePriceOffset.eq(ZERO) ? 'fixed' : 'floating';
-}
 
 export class DLOB {
 	openOrders = new Set<number>();
@@ -129,35 +123,52 @@ export class DLOB {
 		}
 	}
 
-	public getListForOrder(order: Order) : OrderList {
+	public getListForOrder(order: Order): OrderList {
 		const nodeType = nodeTypeForOrder(order);
-		const orderLists = this.getOrderLists(order.marketIndex.toNumber(), nodeType);
+		const orderLists = this.getOrderLists(
+			order.marketIndex.toNumber(),
+			nodeType
+		);
 
 		if (isVariant(order.orderType, 'limit') && order.postOnly) {
-			return isVariant(order.direction, 'long') ? orderLists.mark.desc : orderLists.mark.asc;
+			return isVariant(order.direction, 'long')
+				? orderLists.mark.desc
+				: orderLists.mark.asc;
 		}
 
 		if (isVariant(order.orderType, 'triggerLimit')) {
-			if (isVariant(order.triggerCondition, 'below') && isVariant(order.direction, 'long')) {
+			if (
+				isVariant(order.triggerCondition, 'below') &&
+				isVariant(order.direction, 'long')
+			) {
 				return order.price.lt(order.triggerPrice)
 					? orderLists.bid.desc
 					: orderLists.mark.desc;
 			}
 
-			if (isVariant(order.triggerCondition, 'above') && isVariant(order.direction, 'short')) {
+			if (
+				isVariant(order.triggerCondition, 'above') &&
+				isVariant(order.direction, 'short')
+			) {
 				return order.price.gt(order.triggerPrice)
 					? orderLists.ask.asc
 					: orderLists.mark.asc;
 			}
 
-			return isVariant(order.triggerCondition, 'below') ? orderLists.mark.desc : orderLists.mark.asc;
+			return isVariant(order.triggerCondition, 'below')
+				? orderLists.mark.desc
+				: orderLists.mark.asc;
 		}
 
 		if (isVariant(order.orderType, 'triggerMarket')) {
-			return isVariant(order.triggerCondition, 'below') ? orderLists.mark.desc : orderLists.mark.asc;
+			return isVariant(order.triggerCondition, 'below')
+				? orderLists.mark.desc
+				: orderLists.mark.asc;
 		}
 
-		return isVariant(order.direction, 'long') ? orderLists.bid.desc : orderLists.ask.asc;
+		return isVariant(order.direction, 'long')
+			? orderLists.bid.desc
+			: orderLists.ask.asc;
 	}
 
 	public getOrderLists(marketIndex: number, type: NodeType): OrderLists {

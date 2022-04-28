@@ -8,7 +8,6 @@ import {
 } from '@drift-labs/sdk';
 import { BN } from '@project-serum/anchor';
 import { PublicKey } from '@solana/web3.js';
-import { nodeTypeForOrder } from './DLOB';
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -115,6 +114,12 @@ export class FloatingNode extends Node {
 		).toFixed(3)}`;
 		return msg;
 	}
+}
+
+export type NodeType = 'fixed' | 'floating';
+
+export function nodeTypeForOrder(order: Order): NodeType {
+	return order.oraclePriceOffset.eq(ZERO) ? 'fixed' : 'floating';
 }
 
 export class OrderList {

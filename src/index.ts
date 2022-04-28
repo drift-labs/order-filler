@@ -32,10 +32,10 @@ import {
 	PollingOracleSubscriber,
 	calculateAskPrice,
 	calculateBidPrice,
-	calculateOracleSpread
+	calculateOracleSpread,
 } from '@drift-labs/sdk';
 
-import {Node, OrderList} from './dlob/OrderList';
+import { Node, OrderList } from './dlob/OrderList';
 import { CloudWatchClient } from './cloudWatchClient';
 import { getErrorCode } from './error';
 import { DLOB, DLOBOrderLists } from './dlob/DLOB';
@@ -88,10 +88,14 @@ const runBot = async (wallet: Wallet, clearingHouse: ClearingHouse) => {
 
 	console.log(clearingHouse.program.programId.toString());
 
-	let markets = clearingHouse.getMarketsAccount().markets.filter(market => market.initialized);
+	let markets = clearingHouse
+		.getMarketsAccount()
+		.markets.filter((market) => market.initialized);
 	const updateMarkets = () => {
-		markets = clearingHouse.getMarketsAccount().markets.filter(market => market.initialized);
-	}
+		markets = clearingHouse
+			.getMarketsAccount()
+			.markets.filter((market) => market.initialized);
+	};
 	const updateMarketsIntervalId = setInterval(updateMarkets, 15 * 60 * 1000); // every 15 minutes
 	intervalIds.push(updateMarketsIntervalId);
 
@@ -456,14 +460,11 @@ const runBot = async (wallet: Wallet, clearingHouse: ClearingHouse) => {
 		orderList: OrderList,
 		price: BN
 	): Promise<Node[]> => {
-		if (
-			orderList.head &&
-			orderList.head.pricesCross(price)
-		) {
-			return await findNodesToFill(orderList.head, price)
+		if (orderList.head && orderList.head.pricesCross(price)) {
+			return await findNodesToFill(orderList.head, price);
 		}
 		return [];
-	}
+	};
 
 	const findNodesToFill = async (
 		node: Node,
@@ -527,16 +528,28 @@ const runBot = async (wallet: Wallet, clearingHouse: ClearingHouse) => {
 
 			const nodesToFill: Node[] = [];
 			nodesToFill.push(
-				...(await findNodesToFillFromOrderList(fixedOrderLists.bid.desc, askPrice))
+				...(await findNodesToFillFromOrderList(
+					fixedOrderLists.bid.desc,
+					askPrice
+				))
 			);
 			nodesToFill.push(
-				...(await findNodesToFillFromOrderList(fixedOrderLists.ask.asc, bidPrice))
+				...(await findNodesToFillFromOrderList(
+					fixedOrderLists.ask.asc,
+					bidPrice
+				))
 			);
 			nodesToFill.push(
-				...(await findNodesToFillFromOrderList(fixedOrderLists.mark.desc, markPrice))
+				...(await findNodesToFillFromOrderList(
+					fixedOrderLists.mark.desc,
+					markPrice
+				))
 			);
 			nodesToFill.push(
-				...(await findNodesToFillFromOrderList(fixedOrderLists.mark.asc, markPrice))
+				...(await findNodesToFillFromOrderList(
+					fixedOrderLists.mark.asc,
+					markPrice
+				))
 			);
 
 			const floatingOrderLists = dlob.getOrderLists(
@@ -547,30 +560,36 @@ const runBot = async (wallet: Wallet, clearingHouse: ClearingHouse) => {
 			const oraclePriceData = oracleSubscribers
 				.get(market.amm.oracle.toString())
 				.getOraclePriceData();
-			const askOracleSpread = calculateOracleSpread(
-				askPrice,
-				oraclePriceData
-			);
+			const askOracleSpread = calculateOracleSpread(askPrice, oraclePriceData);
 			const markOracleSpread = calculateOracleSpread(
 				markPrice,
 				oraclePriceData
 			);
-			const bidOracleSpread = calculateOracleSpread(
-				bidPrice,
-				oraclePriceData
-			);
+			const bidOracleSpread = calculateOracleSpread(bidPrice, oraclePriceData);
 
 			nodesToFill.push(
-				...(await findNodesToFillFromOrderList(floatingOrderLists.bid.desc, askOracleSpread))
+				...(await findNodesToFillFromOrderList(
+					floatingOrderLists.bid.desc,
+					askOracleSpread
+				))
 			);
 			nodesToFill.push(
-				...(await findNodesToFillFromOrderList(floatingOrderLists.ask.asc, bidOracleSpread))
+				...(await findNodesToFillFromOrderList(
+					floatingOrderLists.ask.asc,
+					bidOracleSpread
+				))
 			);
 			nodesToFill.push(
-				...(await findNodesToFillFromOrderList(floatingOrderLists.mark.desc, markOracleSpread))
+				...(await findNodesToFillFromOrderList(
+					floatingOrderLists.mark.desc,
+					markOracleSpread
+				))
 			);
 			nodesToFill.push(
-				...(await findNodesToFillFromOrderList(floatingOrderLists.mark.asc, markOracleSpread))
+				...(await findNodesToFillFromOrderList(
+					floatingOrderLists.mark.asc,
+					markOracleSpread
+				))
 			);
 
 			const unfilledNodes = nodesToFill.filter(
@@ -655,14 +674,11 @@ const runBot = async (wallet: Wallet, clearingHouse: ClearingHouse) => {
 						if (errorCode === 6043) {
 							// try to fetch user orders account to make sure its up to date
 							user.fetchAccounts();
-							dlob.remove(
-								nodeToFill.order,
-								() => {
-									console.log(
-										`Order ${nodeToFill.order.orderId.toString()} not found when trying to fill. Removing from order list`
-									)
-								}
-							);
+							dlob.remove(nodeToFill.order, () => {
+								console.log(
+									`Order ${nodeToFill.order.orderId.toString()} not found when trying to fill. Removing from order list`
+								);
+							});
 							printTopOfOrderLists(
 								dlob.orderLists.get(nodeToFill.order.marketIndex.toNumber())
 							);
