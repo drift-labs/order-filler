@@ -156,12 +156,12 @@ const runBot = async (wallet: Wallet, clearingHouse: ClearingHouse) => {
 			convertToNumber(askPrice, MARK_PRICE_PRECISION).toFixed(3)
 		);
 		dlobOrderLists.fixed.bid.desc.printTop();
-		dlobOrderLists.fixed.mark.asc.printTop();
+		dlobOrderLists.fixed.mark.desc.printTop();
 		console.log(
 			`Mark`,
 			convertToNumber(markPrice, MARK_PRICE_PRECISION).toFixed(3)
 		);
-		dlobOrderLists.fixed.mark.desc.printTop();
+		dlobOrderLists.fixed.mark.asc.printTop();
 		dlobOrderLists.fixed.ask.asc.printTop();
 		console.log(
 			`Bid`,
@@ -173,12 +173,12 @@ const runBot = async (wallet: Wallet, clearingHouse: ClearingHouse) => {
 			convertToNumber(askOracleSpread, MARK_PRICE_PRECISION).toFixed(3)
 		);
 		dlobOrderLists.floating.bid.desc.printTop();
-		dlobOrderLists.floating.mark.asc.printTop();
+		dlobOrderLists.floating.mark.desc.printTop();
 		console.log(
 			`Mark Oracle Spread`,
 			convertToNumber(markOracleSpread, MARK_PRICE_PRECISION).toFixed(3)
 		);
-		dlobOrderLists.floating.mark.desc.printTop();
+		dlobOrderLists.floating.mark.asc.printTop();
 		dlobOrderLists.floating.ask.asc.printTop();
 		console.log(
 			`Bid Oracle Spread`,
