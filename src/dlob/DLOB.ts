@@ -4,13 +4,17 @@ import { PublicKey } from '@solana/web3.js';
 
 type OrderLists = {
 	ask: {
+		// Taker asks, Stop Limits, Take Profit Limits
 		asc: OrderList;
 	};
 	mark: {
+		// Maker asks, Stop Markets, Take Profits, Stop Limits, Take Profit Limits
 		asc: OrderList;
+		// Maker bids, Stop Markets, Take Profits
 		desc: OrderList;
 	};
 	bid: {
+		// Taker bids, Stop Limits, Take Profit Limits
 		desc: OrderList;
 	};
 };
